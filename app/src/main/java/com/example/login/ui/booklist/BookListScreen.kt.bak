@@ -1,0 +1,15 @@
+package com.example.login // Make sure this package name matches yours
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.navigation.NavController
+
+@Composable
+fun HomeScreen(nombre: String, apellido: String, navController: NavController) {
+    // We will build the UI for the home screen here later.
+    // For now, a simple welcome message is enough.
+    Column {
+        Text(text = "Welcome, $nombre $apellido!")
+    }
+}

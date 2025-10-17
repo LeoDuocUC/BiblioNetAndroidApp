@@ -1,0 +1,57 @@
+package com.example.login.ui.bookdetail
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.example.login.data.BookWithAuthor
+import com.example.login.viewModel.BookListViewModel
+
+@Composable
+fun BookDetailScreen(
+    book: BookWithAuthor?,
+    navController: NavController,
+    viewModel: BookListViewModel
+) {
+    Column(modifier = Modifier.padding(16.dp)) {
+        if (book != null) {
+            Text(book.book.title, style = MaterialTheme.typography.headlineLarge)
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(book.authorName, style = MaterialTheme.typography.headlineSmall)
+            Spacer(modifier = Modifier.height(16.dp))
+            Text("Género: ${book.book.genre}", style = MaterialTheme.typography.bodyLarge)
+            Text("ISBN: ${book.book.isbn}", style = MaterialTheme.typography.bodyLarge)
+            Text("Estado: ${book.book.state}", style = MaterialTheme.typography.bodyLarge)
+
+            // Show "Request Loan" button if Available
+            if (book.book.state == "Available") {
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(onClick = {
+                    viewModel.requestLoan(book.book, 1)
+                }) {
+                    Text("Solicitar Préstamo")
+                }
+            }
+
+            // --- ADDED: Show "Reserve Book" button if Loaned ---
+            if (book.book.state == "Loaned") {
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(onClick = { /* Logic will go here next */ }) {
+                    Text("Reservar Libro")
+                }
+            }
+            // ----------------------------------------------------
+
+        } else {
+            Text("Libro no encontrado.")
+        }
+        Spacer(modifier = Modifier.height(32.dp))
+        Button(onClick = { navController.popBackStack() }) {
+            Text("Volver a la lista")
+        }
+    }
+}

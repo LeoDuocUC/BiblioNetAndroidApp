@@ -1,0 +1,7 @@
+// In your project's ROOT build.gradle.kts file
+
+plugins {
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.kotlin.android) apply false
+    alias(libs.plugins.ksp) apply false // <-- This is the key line
+}

@@ -1,0 +1,10 @@
+package com.example.login.data
+
+import androidx.room.Dao
+import androidx.room.Insert
+
+@Dao
+interface AuthorDao {
+    @Insert
+    suspend fun insertAuthor(author: Author)
+}

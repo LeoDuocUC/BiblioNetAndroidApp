@@ -1,0 +1,52 @@
+package com.example.login.data
+
+import android.content.Context
+import androidx.room.Database
+import androidx.room.Room
+import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
+import java.util.Date
+
+// 1. AÑADE Loan::class y CAMBIA la versión a 2
+@Database(entities = [User::class, Author::class, Book::class, Loan::class], version = 2)
+@TypeConverters(Converters::class) // 2. AÑADE esto para manejar fechas
+abstract class AppDatabase : RoomDatabase() {
+
+    abstract fun userDao(): UserDao
+    abstract fun authorDao(): AuthorDao
+    abstract fun bookDao(): BookDao
+    abstract fun loanDao(): LoanDao // <-- 3. AÑADE esto
+
+    companion object {
+        @Volatile
+        private var INSTANCE: AppDatabase? = null
+
+        fun getDatabase(context: Context): AppDatabase {
+            return INSTANCE ?: synchronized(this) {
+                val instance = Room.databaseBuilder(
+                    context.applicationContext,
+                    AppDatabase::class.java,
+                    "biblionet_database"
+                )
+                // 4. AÑADE esto para manejar la actualización de la BD
+                .fallbackToDestructiveMigration()
+                .build()
+                INSTANCE = instance
+                instance
+            }
+        }
+    }
+}
+
+// 5. AÑADE esta clase para que Room sepa cómo guardar fechas
+class Converters {
+    @androidx.room.TypeConverter
+    fun fromTimestamp(value: Long?): Date? {
+        return value?.let { Date(it) }
+    }
+
+    @androidx.room.TypeConverter
+    fun dateToTimestamp(date: Date?): Long? {
+        return date?.time
+    }
+}
