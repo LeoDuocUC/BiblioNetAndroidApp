@@ -1,10 +1,11 @@
 package com.example.login.ui.myreservations
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,36 +20,30 @@ import com.example.login.viewModel.MyReservationsViewModel
 fun MyReservationsScreen(
     reservations: List<ReservationWithBookAndAuthor>,
     navController: NavController,
-    viewModel: MyReservationsViewModel // <-- Pass the ViewModel
+    viewModel: MyReservationsViewModel
 ) {
-    LazyColumn(
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        items(reservations) { reservation ->
-            ReservationItem(
-                reservation = reservation,
-                onCancel = {
-                    // Call the ViewModel to cancel the reservation
-                    viewModel.cancelReservation(reservation.reservation)
-                }
-            )
+    // Check if the list of reservations is empty
+    if (reservations.isEmpty()) {
+        // If it's empty, show a message in the center of the screen
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("No tiene Reservas.", style = MaterialTheme.typography.bodyLarge)
         }
-    }
-}
-
-@Composable
-fun ReservationItem(reservation: ReservationWithBookAndAuthor, onCancel: () -> Unit) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = reservation.book.title, style = MaterialTheme.typography.titleLarge)
-            Text(text = reservation.authorName, style = MaterialTheme.typography.bodyMedium)
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(
-                onClick = onCancel,
-                modifier = Modifier.align(Alignment.End)
-            ) {
-                Text("Cancelar Reserva")
+    } else {
+        // If it's not empty, show the list of reserved books
+        LazyColumn(
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(reservations) { reservation ->
+                ReservationItem(
+                    reservation = reservation,
+                    onCancel = {
+                        viewModel.cancelReservation(reservation.reservation)
+                    }
+                )
             }
         }
     }
