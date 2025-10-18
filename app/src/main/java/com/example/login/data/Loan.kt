@@ -12,7 +12,7 @@ import java.util.Date
         ForeignKey(entity = User::class, parentColumns = ["userId"], childColumns = ["userId"]),
         ForeignKey(entity = Book::class, parentColumns = ["bookId"], childColumns = ["bookId"])
     ],
-    indices = [Index(value = ["userId"]), Index(value = ["bookId"])] // <-- ADDED FOR INDEXING
+    indices = [Index(value = ["userId"]), Index(value = ["bookId"])]
 )
 data class Loan(
     @PrimaryKey(autoGenerate = true)
@@ -20,5 +20,6 @@ data class Loan(
     val userId: Int,
     val bookId: Int,
     val loanDate: Date,
-    val dueDate: Date
+    val dueDate: Date,
+    val returnDate: Date? = null // <-- THIS LINE WAS MISSING
 )

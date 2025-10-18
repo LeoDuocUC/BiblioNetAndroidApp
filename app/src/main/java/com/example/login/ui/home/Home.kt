@@ -1,11 +1,6 @@
 package com.example.login.ui.home
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,26 +20,21 @@ fun HomeScreen(nombre: String, apellido: String, navController: NavController) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text("Bienvenido(a) $nombre $apellido", fontSize = 32.sp)
-
         Spacer(modifier = Modifier.height(32.dp))
-
         Button(onClick = { navController.navigate("booklist") }) {
             Text("Ver Catálogo de Libros")
         }
-
         Spacer(modifier = Modifier.height(16.dp))
-
         Button(onClick = { navController.navigate("myloans") }) {
             Text("Mis Préstamos")
         }
-		
-		Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(16.dp))
+        // --- THIS BUTTON WAS MISSING ---
         Button(onClick = { navController.navigate("myreservations") }) {
             Text("Mis Reservas")
         }
-
+        // -----------------------------
         Spacer(modifier = Modifier.height(16.dp))
-
         Button(onClick = {
             navController.navigate("login") {
                 popUpTo(navController.graph.startDestinationId) { inclusive = true }
@@ -53,4 +43,4 @@ fun HomeScreen(nombre: String, apellido: String, navController: NavController) {
             Text("Cerrar Sesión")
         }
     }
-} // <-- This is the closing brace that was likely missing.
+}

@@ -1,16 +1,23 @@
 package com.example.login.data
 
 import androidx.room.Dao
+import androidx.room.Delete // <-- Import added
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ReservationDao {
-    @Insert
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertReservation(reservation: Reservation)
 
-    // --- ADD THIS NEW FUNCTION ---
+    // --- THIS FUNCTION WAS MISSING ---
+    @Delete
+    suspend fun deleteReservation(reservation: Reservation)
+    // ---------------------------------
+
     @Query("""
         SELECT r.*,
                b.bookId AS book_bookId,
@@ -27,4 +34,10 @@ interface ReservationDao {
         WHERE r.userId = :userId
     """)
     fun getReservationsForUser(userId: Int): Flow<List<ReservationWithBookAndAuthor>>
+
+    @Query("SELECT COUNT(*) FROM reservations WHERE userId = :userId")
+    suspend fun countReservationsByUser(userId: Int): Int
+
+    @Query("SELECT COUNT(*) FROM reservations WHERE userId = :userId AND bookId = :bookId")
+    suspend fun hasReservationForBook(userId: Int, bookId: Int): Int
 }

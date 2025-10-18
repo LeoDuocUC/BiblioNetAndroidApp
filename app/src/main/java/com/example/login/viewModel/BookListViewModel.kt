@@ -9,11 +9,23 @@ import kotlinx.coroutines.launch
 import java.util.Calendar
 import java.util.Date
 
+// This enum represents the different states of the reservation UI
+enum class ReservationState {
+    IDLE,
+    LOADING,
+    SUCCESS,
+    ERROR_LIMIT_REACHED,
+    ERROR_ALREADY_RESERVED
+}
+
 class BookListViewModel(
     private val bookDao: BookDao,
     private val loanDao: LoanDao,
     private val reservationDao: ReservationDao
 ) : ViewModel() {
+
+    private val _reservationState = MutableStateFlow(ReservationState.IDLE)
+    val reservationState = _reservationState.asStateFlow()
 
     val books: StateFlow<List<BookWithAuthor>> = bookDao.getAllBooksWithAuthors()
         .stateIn(
@@ -23,7 +35,6 @@ class BookListViewModel(
         )
 
     private val _selectedBook = MutableStateFlow<BookWithAuthor?>(null)
-    // CORRECTED: The line below now correctly references _selectedBook
     val selectedBook = _selectedBook.asStateFlow()
 
     fun findBookById(bookId: Int) {
@@ -50,14 +61,30 @@ class BookListViewModel(
     }
 
     fun reserveBook(book: Book, userId: Int) {
-        viewModelScope.launch {
-            val newReservation = Reservation(
-                userId = userId,
-                bookId = book.bookId,
-                reservationDate = Date()
-            )
-            reservationDao.insertReservation(newReservation)
+        // Only start a new reservation if we are not already in the middle of one
+        if (_reservationState.value != ReservationState.LOADING) {
+            viewModelScope.launch {
+                _reservationState.value = ReservationState.LOADING
+
+                if (reservationDao.countReservationsByUser(userId) >= 5) {
+                    _reservationState.value = ReservationState.ERROR_LIMIT_REACHED
+                    return@launch
+                }
+
+                if (reservationDao.hasReservationForBook(userId, book.bookId) > 0) {
+                    _reservationState.value = ReservationState.ERROR_ALREADY_RESERVED
+                    return@launch
+                }
+
+                val newReservation = Reservation(userId = userId, bookId = book.bookId, reservationDate = Date())
+                reservationDao.insertReservation(newReservation)
+                _reservationState.value = ReservationState.SUCCESS
+            }
         }
+    }
+
+    fun resetReservationState() {
+        _reservationState.value = ReservationState.IDLE
     }
 }
 

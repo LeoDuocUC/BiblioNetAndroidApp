@@ -9,7 +9,6 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -44,9 +43,9 @@ class MainActivity : ComponentActivity() {
     private val bookListViewModel: BookListViewModel by viewModels {
         BookListViewModelFactory(database.bookDao(), database.loanDao(), database.reservationDao())
     }
-    
+
     private val myLoansViewModel: MyLoansViewModel by viewModels {
-        MyLoansViewModelFactory(database.loanDao())
+        MyLoansViewModelFactory(database.loanDao(), database.bookDao())
     }
 
     private val myReservationsViewModel: MyReservationsViewModel by viewModels {
@@ -55,7 +54,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+
         CoroutineScope(Dispatchers.IO).launch {
             if (database.authorDao().getAuthorCount() == 0) {
                 database.authorDao().insertAuthor(Author(authorId = 1, fullName = "J.R.R. Tolkien"))
@@ -123,7 +122,7 @@ fun AppNavigator(
         }
         composable("myreservations") {
             val reservations by myReservationsViewModel.userReservations.collectAsState()
-            MyReservationsScreen(reservations = reservations, navController = navController)
+            MyReservationsScreen(reservations = reservations, navController = navController, viewModel = myReservationsViewModel)
         }
     }
 }

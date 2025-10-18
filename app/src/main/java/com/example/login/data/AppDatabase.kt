@@ -7,8 +7,11 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import java.util.Date
 
-// 1. ADD Reservation::class and BUMP the version to 3
-@Database(entities = [User::class, Author::class, Book::class, Loan::class, Reservation::class], version = 3)
+@Database(
+    entities = [User::class, Author::class, Book::class, Loan::class, Reservation::class],
+    version = 6, // <-- ESTE ES EL CAMBIO
+    exportSchema = true
+)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
 
@@ -16,7 +19,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun authorDao(): AuthorDao
     abstract fun bookDao(): BookDao
     abstract fun loanDao(): LoanDao
-    abstract fun reservationDao(): ReservationDao // <-- 2. ADD the new DAO
+    abstract fun reservationDao(): ReservationDao
 
     companion object {
         @Volatile
@@ -29,7 +32,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "biblionet_database"
                 )
-                .fallbackToDestructiveMigration() // This handles the version update for now
+                .fallbackToDestructiveMigration()
                 .build()
                 INSTANCE = instance
                 instance
@@ -38,7 +41,6 @@ abstract class AppDatabase : RoomDatabase() {
     }
 }
 
-// Converters class remains the same
 class Converters {
     @androidx.room.TypeConverter
     fun fromTimestamp(value: Long?): Date? {
