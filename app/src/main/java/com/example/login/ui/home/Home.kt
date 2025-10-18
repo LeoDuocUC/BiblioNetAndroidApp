@@ -29,11 +29,9 @@ fun HomeScreen(nombre: String, apellido: String, navController: NavController) {
             Text("Mis Préstamos")
         }
         Spacer(modifier = Modifier.height(16.dp))
-        // --- THIS BUTTON WAS MISSING ---
         Button(onClick = { navController.navigate("myreservations") }) {
             Text("Mis Reservas")
         }
-        // -----------------------------
         Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = {
             navController.navigate("login") {

@@ -23,7 +23,7 @@ import com.example.login.data.Author
 import com.example.login.data.Book
 import com.example.login.ui.bookdetail.BookDetailScreen
 import com.example.login.ui.booklist.BookListScreen
-import com.example.login.ui.home.HomeScreen
+import com.example.login.ui.home.HomeScreen // <-- This import fixes the error
 import com.example.login.ui.myloans.MyLoansScreen
 import com.example.login.ui.myreservations.MyReservationsScreen
 import com.example.login.ui.theme.LoginTheme
@@ -54,7 +54,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        
         CoroutineScope(Dispatchers.IO).launch {
             if (database.authorDao().getAuthorCount() == 0) {
                 database.authorDao().insertAuthor(Author(authorId = 1, fullName = "J.R.R. Tolkien"))
@@ -118,11 +118,19 @@ fun AppNavigator(
         }
         composable("myloans") {
             val loans by myLoansViewModel.userLoans.collectAsState()
-            MyLoansScreen(loans = loans, navController = navController)
+            MyLoansScreen(
+                loans = loans,
+                navController = navController,
+                viewModel = myLoansViewModel
+            )
         }
         composable("myreservations") {
             val reservations by myReservationsViewModel.userReservations.collectAsState()
-            MyReservationsScreen(reservations = reservations, navController = navController, viewModel = myReservationsViewModel)
+            MyReservationsScreen(
+                reservations = reservations,
+                navController = navController,
+                viewModel = myReservationsViewModel
+            )
         }
     }
 }
