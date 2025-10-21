@@ -1,19 +1,27 @@
 package com.example.login
 
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.provider.MediaStore
+import android.provider.MediaStore.Audio.Media // Importación para el audio
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -23,7 +31,7 @@ import com.example.login.data.Author
 import com.example.login.data.Book
 import com.example.login.ui.bookdetail.BookDetailScreen
 import com.example.login.ui.booklist.BookListScreen
-import com.example.login.ui.home.HomeScreen // <-- This import fixes the error
+import com.example.login.ui.home.HomeScreen
 import com.example.login.ui.myloans.MyLoansScreen
 import com.example.login.ui.myreservations.MyReservationsScreen
 import com.example.login.ui.theme.LoginTheme
@@ -52,9 +60,88 @@ class MainActivity : ComponentActivity() {
         MyReservationsViewModelFactory(database.reservationDao())
     }
 
+    // --- LÓGICA DE CÁMARA EXISTENTE ---
+    private val requestPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            if (isGranted) {
+                launchCameraIntent()
+            } else {
+                Toast.makeText(this, "Permiso de cámara denegado", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+    private val takePictureLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                Toast.makeText(this, "Foto tomada con éxito", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+    fun launchCameraIntent() {
+        val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        try {
+            takePictureLauncher.launch(takePictureIntent)
+        } catch (e: Exception) {
+            Toast.makeText(this, "No se puede acceder a la cámara", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    fun checkCameraPermissionAndLaunch() {
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA)
+            == PackageManager.PERMISSION_GRANTED) {
+            launchCameraIntent()
+        } else {
+            requestPermissionLauncher.launch(android.Manifest.permission.CAMERA)
+        }
+    }
+    // --- FIN LÓGICA DE CÁMARA ---
+
+
+    // --- NUEVA LÓGICA DE MICRÓFONO ---
+    private val requestMicrophonePermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            if (isGranted) {
+                // Permiso concedido, lanzamos el grabador de audio
+                launchAudioRecorderIntent()
+            } else {
+                // Permiso denegado
+                Toast.makeText(this, "Permiso de micrófono denegado", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+    private val recordAudioLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                Toast.makeText(this, "Grabación de audio terminada con éxito", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+    fun launchAudioRecorderIntent() {
+        val takeAudioIntent = Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION)
+        try {
+            recordAudioLauncher.launch(takeAudioIntent)
+        } catch (e: Exception) {
+            Toast.makeText(this, "No se puede acceder al grabador de audio", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // Función principal que comprueba permisos y lanza el micrófono
+    fun checkMicrophonePermissionAndLaunch() {
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.RECORD_AUDIO)
+            == PackageManager.PERMISSION_GRANTED) {
+            // Ya tiene el permiso
+            launchAudioRecorderIntent()
+        } else {
+            // Pedimos el permiso
+            requestMicrophonePermissionLauncher.launch(android.Manifest.permission.RECORD_AUDIO)
+        }
+    }
+    // --- FIN LÓGICA DE MICRÓFONO ---
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+
         CoroutineScope(Dispatchers.IO).launch {
             if (database.authorDao().getAuthorCount() == 0) {
                 database.authorDao().insertAuthor(Author(authorId = 1, fullName = "J.R.R. Tolkien"))
@@ -78,7 +165,10 @@ class MainActivity : ComponentActivity() {
                     loginViewModel = loginViewModel,
                     bookListViewModel = bookListViewModel,
                     myLoansViewModel = myLoansViewModel,
-                    myReservationsViewModel = myReservationsViewModel
+                    myReservationsViewModel = myReservationsViewModel,
+                    onScanClick = { checkCameraPermissionAndLaunch() },
+                    // NUEVO: Pasamos la función de micrófono al navegador
+                    onMicrophoneClick = { checkMicrophonePermissionAndLaunch() }
                 )
             }
         }
@@ -91,7 +181,10 @@ fun AppNavigator(
     loginViewModel: LoginViewModel,
     bookListViewModel: BookListViewModel,
     myLoansViewModel: MyLoansViewModel,
-    myReservationsViewModel: MyReservationsViewModel
+    myReservationsViewModel: MyReservationsViewModel,
+    onScanClick: () -> Unit,
+    // NUEVO: Recibimos la función
+    onMicrophoneClick: () -> Unit
 ) {
     NavHost(navController = navController, startDestination = "login") {
         composable("login") {
@@ -100,7 +193,14 @@ fun AppNavigator(
         composable("home/{nombre}/{apellido}") { backStackEntry ->
             val nombre = backStackEntry.arguments?.getString("nombre") ?: "User"
             val apellido = backStackEntry.arguments?.getString("apellido") ?: ""
-            HomeScreen(nombre = nombre, apellido = apellido, navController = navController)
+            // Pasamos ambas funciones a HomeScreen
+            HomeScreen(
+                nombre = nombre,
+                apellido = apellido,
+                navController = navController,
+                onScanClick = onScanClick,
+                onMicrophoneClick = onMicrophoneClick // Aquí se pasa la nueva función
+            )
         }
         composable("booklist") {
             val books by bookListViewModel.books.collectAsState()
@@ -134,6 +234,8 @@ fun AppNavigator(
         }
     }
 }
+
+// ... (El código de LoginForm sigue igual)
 
 @Composable
 fun LoginForm(
