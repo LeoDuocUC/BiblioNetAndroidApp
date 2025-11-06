@@ -146,8 +146,31 @@ class MainActivity : ComponentActivity() {
             if (database.authorDao().getAuthorCount() == 0) {
                 database.authorDao().insertAuthor(Author(authorId = 1, fullName = "J.R.R. Tolkien"))
                 database.authorDao().insertAuthor(Author(authorId = 2, fullName = "Gabriel García Márquez"))
-                database.bookDao().insertBook(Book(1, "The Lord of the Rings", 1, "978-0618640157", "Fantasy", "", "Available"))
-                database.bookDao().insertBook(Book(2, "Cien Años de Soledad", 2, "978-0307350442", "Magic Realism", "", "Loaned"))
+                
+                // --- BOOK DATA WITH IMAGE URLs (CORRECTED) ---
+                database.bookDao().insertBook(
+                    Book(
+                        bookId = 1,
+                        title = "The Lord of the Rings",
+                        authorId = 1,
+                        isbn = "978-0618640157",
+                        genre = "Fantasy",
+                        coverUrl = "https://covers.openlibrary.org/b/id/12838421-L.jpg",
+                        state = "Available"
+                    )
+                )
+                database.bookDao().insertBook(
+                    Book(
+                        bookId = 2,
+                        title = "Cien Años de Soledad",
+                        authorId = 2,
+                        isbn = "978-0307350442",
+                        genre = "Magic Realism",
+                        coverUrl = "https://covers.openlibrary.org/b/id/8478810-L.jpg", // <-- Corrected URL
+                        state = "Loaned"
+                    )
+                )
+                // ---------------------------------
             }
 
             if (database.userDao().findUserByEmail("test@test.com") == null) {
@@ -167,7 +190,6 @@ class MainActivity : ComponentActivity() {
                     myLoansViewModel = myLoansViewModel,
                     myReservationsViewModel = myReservationsViewModel,
                     onScanClick = { checkCameraPermissionAndLaunch() },
-                    // NUEVO: Pasamos la función de micrófono al navegador
                     onMicrophoneClick = { checkMicrophonePermissionAndLaunch() }
                 )
             }
@@ -183,7 +205,6 @@ fun AppNavigator(
     myLoansViewModel: MyLoansViewModel,
     myReservationsViewModel: MyReservationsViewModel,
     onScanClick: () -> Unit,
-    // NUEVO: Recibimos la función
     onMicrophoneClick: () -> Unit
 ) {
     NavHost(navController = navController, startDestination = "login") {
@@ -193,13 +214,12 @@ fun AppNavigator(
         composable("home/{nombre}/{apellido}") { backStackEntry ->
             val nombre = backStackEntry.arguments?.getString("nombre") ?: "User"
             val apellido = backStackEntry.arguments?.getString("apellido") ?: ""
-            // Pasamos ambas funciones a HomeScreen
             HomeScreen(
                 nombre = nombre,
                 apellido = apellido,
                 navController = navController,
                 onScanClick = onScanClick,
-                onMicrophoneClick = onMicrophoneClick // Aquí se pasa la nueva función
+                onMicrophoneClick = onMicrophoneClick
             )
         }
         composable("booklist") {
@@ -234,8 +254,6 @@ fun AppNavigator(
         }
     }
 }
-
-// ... (El código de LoginForm sigue igual)
 
 @Composable
 fun LoginForm(

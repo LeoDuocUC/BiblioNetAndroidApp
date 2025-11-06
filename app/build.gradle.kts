@@ -47,6 +47,7 @@ android {
 }
 
 dependencies {
+    implementation("io.coil-kt:coil-compose:2.5.0") // Adding Images
     implementation("androidx.navigation:navigation-compose:2.8.0")
     implementation("androidx.datastore:datastore-preferences:1.1.7")
     implementation(libs.androidx.core.ktx)
@@ -64,6 +65,7 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+	
 
     // --- ADDED FOR ROOM ---
     implementation(libs.androidx.room.runtime)
