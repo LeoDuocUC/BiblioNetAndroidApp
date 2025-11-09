@@ -1,0 +1,12 @@
+duocdb_high = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.sa-santiago-1.oraclecloud.com))(connect_data=(service_name=g464f66c67d0b60_duocdb_high.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+duocdb_low = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.sa-santiago-1.oraclecloud.com))(connect_data=(service_name=g464f66c67d0b60_duocdb_low.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+duocdb_medium = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.sa-santiago-1.oraclecloud.com))(connect_data=(service_name=g464f66c67d0b60_duocdb_medium.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+duocdb_tp = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.sa-santiago-1.oraclecloud.com))(connect_data=(service_name=g464f66c67d0b60_duocdb_tp.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+duocdb_tpurgent = (description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1522)(host=adb.sa-santiago-1.oraclecloud.com))(connect_data=(service_name=g464f66c67d0b60_duocdb_tpurgent.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))
+
+
+
